@@ -4,10 +4,10 @@
   "framework": "vite",
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-    { "source": "/robots.txt", "destination": "/robots.txt" },
-    { "source": "/google2cf40c9239044b00.html", "destination": "/google2cf40c9239044b00.html" },
-    { "source": "/(.*)", "destination": "/" }
+    { 
+      "source": "/((?!sitemap\\.xml|robots\\.txt|google2cf40c9239044b00\\.html|assets|favicon|site\\.webmanifest).*)", 
+      "destination": "/" 
+    }
   ],
   "headers": [
     {
