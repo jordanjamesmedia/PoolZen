@@ -4,6 +4,9 @@
   "framework": "vite",
   "installCommand": "npm install",
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/google2cf40c9239044b00.html", "destination": "/google2cf40c9239044b00.html" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "headers": [
