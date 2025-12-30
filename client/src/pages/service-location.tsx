@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useRoute } from "wouter";
 import SeoHead from "@/components/seo-head";
 import Header from "@/components/header";
@@ -11,7 +12,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { generateSeoTitle, generateSeoDescription, generateSeoKeywords, generateCanonicalUrl } from "@/lib/seo-utils";
-import { Service, Location, Suburb } from "@shared/schema";
 import { CheckCircle, Clock, Shield, Star } from "lucide-react";
 import Breadcrumb from "@/components/breadcrumb";
 import FAQSection from "@/components/faq-section";
@@ -21,27 +21,12 @@ export default function ServiceLocation() {
   const [, params] = useRoute("/services/:serviceSlug/:locationSlug");
   const { serviceSlug, locationSlug } = params || {};
 
-  const { data: service, isLoading: serviceLoading } = useQuery<Service>({
-    queryKey: ["/api/services", serviceSlug],
-    enabled: !!serviceSlug
-  });
+  const service = useQuery(api.services.getBySlug, serviceSlug ? { slug: serviceSlug } : "skip");
+  const location = useQuery(api.locations.getBySlug, locationSlug ? { slug: locationSlug } : "skip");
+  const allSuburbs = useQuery(api.suburbs.getAll);
+  const allLocations = useQuery(api.locations.getAll);
 
-  const { data: location, isLoading: locationLoading } = useQuery<Location>({
-    queryKey: ["/api/locations", locationSlug],
-    enabled: !!locationSlug
-  });
-
-  // Fetch all suburbs to show comprehensive coverage
-  const { data: allSuburbs } = useQuery<Suburb[]>({
-    queryKey: ["/api/suburbs"],
-  });
-
-  // Fetch all locations to organize suburbs properly  
-  const { data: allLocations } = useQuery<Location[]>({
-    queryKey: ["/api/locations"],
-  });
-
-  const isLoading = serviceLoading || locationLoading;
+  const isLoading = service === undefined || location === undefined;
 
   if (isLoading) {
     return (
@@ -252,14 +237,15 @@ export default function ServiceLocation() {
 
           {allLocations && allSuburbs && (() => {
             // Group suburbs by their parent locations
+            type SuburbType = typeof allSuburbs[number];
             const suburbsByLocation = allLocations.reduce((acc, loc) => {
-              const locationSuburbs = allSuburbs.filter(s => s.parentLocationId === loc.id);
+              const locationSuburbs = allSuburbs.filter(s => s.parentLocationId === loc._id);
               if (locationSuburbs.length > 0) {
                 acc[loc.region] = acc[loc.region] || {};
                 acc[loc.region][loc.name] = locationSuburbs;
               }
               return acc;
-            }, {} as Record<string, Record<string, Suburb[]>>);
+            }, {} as Record<string, Record<string, SuburbType[]>>);
 
             return (
               <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
@@ -282,7 +268,7 @@ export default function ServiceLocation() {
                             
                             <div className="grid grid-cols-1 gap-2 mb-4">
                               {suburbs.slice(0, 6).map((suburb) => (
-                                <div key={suburb.id} className="flex items-center justify-between py-1.5 px-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                                <div key={suburb._id} className="flex items-center justify-between py-1.5 px-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
                                   <a 
                                     href={`/${suburb.slug}`}
                                     className="text-gray-700 hover:text-pool-blue transition-colors font-medium text-sm flex-1"

@@ -1,4 +1,4 @@
-import { type Service, type Location } from "@shared/schema";
+import { type Service, type Location } from "@/types/convex";
 
 interface LocalSchemaProps {
   service?: Service;

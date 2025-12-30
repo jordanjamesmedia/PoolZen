@@ -1,16 +1,11 @@
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Facebook, Instagram, Linkedin } from "lucide-react";
-import { Service, Location } from "@shared/schema";
 
 export default function Footer() {
-  const { data: services } = useQuery<Service[]>({
-    queryKey: ["/api/services"]
-  });
-
-  const { data: locations } = useQuery<Location[]>({
-    queryKey: ["/api/locations"]
-  });
+  const services = useQuery(api.services.getAll);
+  const locations = useQuery(api.locations.getAll);
 
   const sydneyLocations = locations?.filter(location => location.region === "Sydney") || [];
   const otherLocations = locations?.filter(location => location.region !== "Sydney") || [];
@@ -40,7 +35,7 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4" data-testid="text-services-footer-title">Services</h3>
             <ul className="space-y-2 text-gray-300">
               {services?.map((service) => (
-                <li key={service.id}>
+                <li key={service._id}>
                   <Link 
                     href={`/services/${service.slug}/sydney-north-shore`}
                     className="hover:text-white transition-colors"
@@ -57,7 +52,7 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4" data-testid="text-areas-footer-title">Service Areas</h3>
             <ul className="space-y-2 text-gray-300">
               {sydneyLocations.slice(0, 5).map((location) => (
-                <li key={location.id}>
+                <li key={location._id}>
                   <Link
                     href={`/services/pool-cleaning/${location.slug}`}
                     className="hover:text-white transition-colors"
@@ -105,7 +100,7 @@ export default function Footer() {
               </h4>
               <ul className="space-y-1">
                 {services?.map((service) => (
-                  <li key={service.id}>
+                  <li key={service._id}>
                     <Link 
                       href={`/services/${service.slug}/sydney-north-shore`}
                       className="hover:text-white"
@@ -123,7 +118,7 @@ export default function Footer() {
               </h4>
               <ul className="space-y-1">
                 {services?.map((service) => (
-                  <li key={service.id}>
+                  <li key={service._id}>
                     <Link 
                       href={`/services/${service.slug}/newcastle`}
                       className="hover:text-white"
@@ -141,7 +136,7 @@ export default function Footer() {
               </h4>
               <ul className="space-y-1">
                 {services?.map((service) => (
-                  <li key={service.id}>
+                  <li key={service._id}>
                     <Link 
                       href={`/services/${service.slug}/illawarra`}
                       className="hover:text-white"

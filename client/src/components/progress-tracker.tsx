@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Location, Service, Suburb } from "@shared/schema";
 import { Target, CheckCircle, MapPin, Wrench, Building } from "lucide-react";
 
 interface PageCount {
@@ -19,17 +19,9 @@ interface ProgressStats {
 }
 
 export default function ProgressTracker() {
-  const { data: locations } = useQuery<Location[]>({
-    queryKey: ["/api/locations"]
-  });
-
-  const { data: services } = useQuery<Service[]>({
-    queryKey: ["/api/services"]
-  });
-
-  const { data: suburbs } = useQuery<Suburb[]>({
-    queryKey: ["/api/suburbs"]
-  });
+  const locations = useQuery(api.locations.getAll);
+  const services = useQuery(api.services.getAll);
+  const suburbs = useQuery(api.suburbs.getAll);
 
   if (!locations || !services || !suburbs) {
     return (

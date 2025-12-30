@@ -71,7 +71,7 @@ export default function ServiceGrid({ locationSlug, locationName = "Sydney" }: S
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {services?.map((service) => (
             <Card 
-              key={service.id} 
+              key={service._id} 
               className="hover:shadow-xl transition-shadow cursor-pointer group"
               data-testid={`card-service-${service.slug}`}
             >

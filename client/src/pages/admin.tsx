@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 import SeoHead from "@/components/seo-head";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -28,8 +29,6 @@ import {
   Search,
   Download
 } from "lucide-react";
-import { Quote, Service, Location, Suburb } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 
 interface AdminStats {
   totalQuotes: number;
@@ -42,7 +41,15 @@ interface AdminStats {
   averageQuoteValue: number;
 }
 
-interface QuoteWithDetails extends Quote {
+interface QuoteWithDetails {
+  _id: Id<"quotes">;
+  customerName: string;
+  email: string;
+  phone: string;
+  status: string;
+  estimatedValue?: number;
+  createdAt: number;
+  message?: string;
   locationName?: string;
   serviceName?: string;
 }
@@ -52,11 +59,11 @@ export default function AdminPage() {
   const [quoteFilter, setQuoteFilter] = useState<"all" | "pending" | "completed">("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch all data
-  const { data: services } = useQuery<Service[]>({ queryKey: ["/api/services"] });
-  const { data: locations } = useQuery<Location[]>({ queryKey: ["/api/locations"] });
-  const { data: suburbs } = useQuery<Suburb[]>({ queryKey: ["/api/suburbs"] });
-  const { data: quotes } = useQuery<Quote[]>({ queryKey: ["/api/quotes"] });
+  // Fetch all data using Convex
+  const services = useQuery(api.services.getAll);
+  const locations = useQuery(api.locations.getAll);
+  const suburbs = useQuery(api.suburbs.getAll);
+  const quotes = useQuery(api.quotes.getAll);
 
   // Calculate admin stats
   const adminStats: AdminStats = {
@@ -77,8 +84,8 @@ export default function AdminPage() {
   // Enhanced quotes with location and service details
   const quotesWithDetails: QuoteWithDetails[] = (quotes || []).map(quote => ({
     ...quote,
-    locationName: locations?.find(loc => loc.id === quote.locationId)?.name || 'Unknown',
-    serviceName: services?.find(svc => svc.id === quote.serviceId)?.name || 'General Service'
+    locationName: locations?.find(loc => loc._id === quote.locationId)?.name || 'Unknown',
+    serviceName: services?.find(svc => svc._id === quote.serviceId)?.name || 'General Service'
   }));
 
   // Filter quotes based on selected filter and search
@@ -92,18 +99,11 @@ export default function AdminPage() {
     return matchesFilter && matchesSearch;
   });
 
-  // Update quote status mutation
-  const updateQuoteStatus = useMutation({
-    mutationFn: async ({ quoteId, status }: { quoteId: string, status: string }) => {
-      return await apiRequest(`/api/quotes/${quoteId}/status`, 'PUT', { status });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/quotes"] });
-    }
-  });
+  // Update quote status mutation using Convex
+  const updateQuoteStatusMutation = useMutation(api.quotes.updateStatus);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-AU', {
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-AU', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -251,7 +251,7 @@ export default function AdminPage() {
               <CardContent>
                 <div className="space-y-4">
                   {filteredQuotes.slice(0, 5).map((quote) => (
-                    <div key={quote.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div key={quote._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
                           <span className="font-semibold">{quote.customerName}</span>
@@ -314,7 +314,7 @@ export default function AdminPage() {
             {/* Quotes List */}
             <div className="grid gap-4">
               {filteredQuotes.map((quote) => (
-                <Card key={quote.id}>
+                <Card key={quote._id}>
                   <CardContent className="p-6">
                     <div className="grid md:grid-cols-3 gap-6">
                       <div>
@@ -359,8 +359,7 @@ export default function AdminPage() {
                             <Button
                               size="sm"
                               className="bg-green-600 hover:bg-green-700"
-                              onClick={() => updateQuoteStatus.mutate({ quoteId: quote.id, status: 'completed' })}
-                              disabled={updateQuoteStatus.isPending}
+                              onClick={() => updateQuoteStatusMutation({ id: quote._id, status: 'completed' })}
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Mark Complete
@@ -369,8 +368,7 @@ export default function AdminPage() {
                               size="sm"
                               variant="outline"
                               className="border-red-200 text-red-600 hover:bg-red-50"
-                              onClick={() => updateQuoteStatus.mutate({ quoteId: quote.id, status: 'cancelled' })}
-                              disabled={updateQuoteStatus.isPending}
+                              onClick={() => updateQuoteStatusMutation({ id: quote._id, status: 'cancelled' })}
                             >
                               <XCircle className="h-3 w-3 mr-1" />
                               Cancel
@@ -402,7 +400,7 @@ export default function AdminPage() {
           <TabsContent value="services">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services?.map((service) => (
-                <Card key={service.id}>
+                <Card key={service._id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -440,7 +438,7 @@ export default function AdminPage() {
           <TabsContent value="locations">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {locations?.map((location) => (
-                <Card key={location.id}>
+                <Card key={location._id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>

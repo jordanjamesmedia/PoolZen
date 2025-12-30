@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import SeoHead from "@/components/seo-head";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -10,7 +11,6 @@ import LocalSchema from "@/components/local-schema";
 import Breadcrumb from "@/components/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Suburb, Location } from "@shared/schema";
 import { MapPin, Phone, Star, Clock, Shield, Award, CheckCircle } from "lucide-react";
 import LocationPage from "./location-page";
 
@@ -21,22 +21,19 @@ interface SuburbPageProps {
 
 export default function SuburbPage({ suburbSlug, fallbackToLocation = false }: SuburbPageProps) {
   // Try to fetch suburb first
-  const { data: suburb, isLoading: suburbLoading, error: suburbError } = useQuery<Suburb>({
-    queryKey: ["/api/suburbs", suburbSlug],
-    enabled: !!suburbSlug
-  });
+  const suburb = useQuery(api.suburbs.getBySlug, suburbSlug ? { slug: suburbSlug } : "skip");
+  const suburbLoading = suburb === undefined;
 
   // If suburb is not found and fallback is enabled, try location
-  const { data: location, isLoading: locationLoading } = useQuery<Location>({
-    queryKey: ["/api/locations", suburbSlug],
-    enabled: !!suburbSlug && fallbackToLocation && !suburb && !suburbLoading
-  });
+  const location = useQuery(
+    api.locations.getBySlug,
+    suburbSlug && fallbackToLocation && !suburb && !suburbLoading ? { slug: suburbSlug } : "skip"
+  );
+  const locationLoading = location === undefined && fallbackToLocation && !suburb && !suburbLoading;
 
-  // Get parent location data for suburb
-  const { data: parentLocation } = useQuery<Location>({
-    queryKey: ["/api/locations", suburb?.parentLocationId],
-    enabled: !!suburb?.parentLocationId
-  });
+  // Get all locations to find the parent
+  const allLocations = useQuery(api.locations.getAll);
+  const parentLocation = allLocations?.find(loc => loc._id === suburb?.parentLocationId);
 
   if (suburbLoading || locationLoading) {
     return (
@@ -128,7 +125,8 @@ export default function SuburbPage({ suburbSlug, fallbackToLocation = false }: S
 
   // Create location-like schema for suburb
   const suburbAsLocation = {
-    id: suburb.id,
+    _id: suburb._id as any,
+    _creationTime: suburb._creationTime,
     name: suburb.name,
     slug: suburb.slug,
     region: suburb.region,

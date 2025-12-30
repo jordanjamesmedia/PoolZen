@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useRoute } from "wouter";
 import SeoHead from "@/components/seo-head";
 import Header from "@/components/header";
@@ -12,22 +13,15 @@ import Breadcrumb from "@/components/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Location, Service } from "@shared/schema";
 import { MapPin, Phone, Star, Clock, Shield, Award, CheckCircle, ArrowRight, Wrench } from "lucide-react";
 
 export default function LocationPage() {
   const [, params] = useRoute("/:locationSlug");
   const { locationSlug } = params || {};
 
-  const { data: location, isLoading } = useQuery<Location>({
-    queryKey: ["/api/locations", locationSlug],
-    enabled: !!locationSlug
-  });
-
-  // Fetch all services to display for this location
-  const { data: services } = useQuery<Service[]>({
-    queryKey: ["/api/services"]
-  });
+  const location = useQuery(api.locations.getBySlug, locationSlug ? { slug: locationSlug } : "skip");
+  const services = useQuery(api.services.getAll);
+  const isLoading = location === undefined;
 
   if (isLoading) {
     return (
@@ -310,7 +304,7 @@ export default function LocationPage() {
           {services && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service) => (
-                <Card key={service.id} className="hover:shadow-lg transition-all duration-300 border-2 hover:border-pool-blue">
+                <Card key={service._id} className="hover:shadow-lg transition-all duration-300 border-2 hover:border-pool-blue">
                   <CardContent className="p-8">
                     <div className="text-center mb-6">
                       <div className="w-16 h-16 bg-pool-blue rounded-full flex items-center justify-center mx-auto mb-4">

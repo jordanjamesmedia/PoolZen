@@ -1,4 +1,4 @@
-import { Service, Location } from "@shared/schema";
+import { Service, Location } from "@/types/convex";
 
 export function generateSeoTitle(service?: Service, location?: Location): string {
   if (service && location) {
