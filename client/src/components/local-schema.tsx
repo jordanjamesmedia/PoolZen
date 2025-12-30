@@ -21,6 +21,19 @@ export default function LocalSchema({ service, location }: LocalSchemaProps) {
     "priceRange": "$79-$149",
     "paymentAccepted": ["Cash", "Credit Card", "Bank Transfer"],
     "currenciesAccepted": "AUD",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Sydney, NSW",
+      "addressLocality": "Sydney",
+      "addressRegion": "NSW",
+      "postalCode": "2000",
+      "addressCountry": "AU"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -33.8688,
+      "longitude": 151.2093
+    },
     "openingHours": [
       "Mo-Fr 07:00-18:00",
       "Sa 08:00-16:00"
