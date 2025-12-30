@@ -116,8 +116,8 @@ function generateSitemap() {
 
   xml += '</urlset>';
 
-  // Write sitemap to public folder
-  const outputPath = path.join(__dirname, '../public/sitemap.xml');
+  // Write sitemap to client/public folder
+  const outputPath = path.join(__dirname, '../client/public/sitemap.xml');
   fs.writeFileSync(outputPath, xml);
   
   console.log(`✅ Sitemap generated successfully at ${outputPath}`);
