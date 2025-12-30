@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { generateFaqSchema } from "@/lib/seo-utils";
 
 interface FAQItem {
   question: string;
@@ -83,6 +84,31 @@ export default function FAQSection({ serviceName, locationName }: FAQSectionProp
   };
 
   const faqs = getLocationSpecificFAQs();
+
+  // Add FAQ structured data for SEO
+  useEffect(() => {
+    const faqSchema = generateFaqSchema(faqs);
+    
+    // Remove any existing FAQ schema
+    const existingScript = document.querySelector('script[data-faq-schema]');
+    if (existingScript) {
+      existingScript.remove();
+    }
+    
+    // Add new FAQ schema
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.setAttribute('data-faq-schema', 'true');
+    script.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(script);
+    
+    return () => {
+      const scriptToRemove = document.querySelector('script[data-faq-schema]');
+      if (scriptToRemove) {
+        scriptToRemove.remove();
+      }
+    };
+  }, [faqs]);
 
   return (
     <section className="py-16 bg-gray-50" data-testid="faq-section">

@@ -9,15 +9,25 @@ import ContactForm from "@/components/contact-form";
 import Footer from "@/components/footer";
 import FAQSection from "@/components/faq-section";
 import LocalSchema from "@/components/local-schema";
-import { generateSeoTitle, generateSeoDescription, generateSeoKeywords } from "@/lib/seo-utils";
+import { 
+  generateSeoTitle, 
+  generateSeoDescription, 
+  generateSeoKeywords,
+  generateCanonicalUrl,
+  generateLocalBusinessSchema 
+} from "@/lib/seo-utils";
 
 export default function Home() {
+  const structuredData = generateLocalBusinessSchema();
+  
   return (
     <div className="min-h-screen bg-clean-white">
       <SeoHead
         title={generateSeoTitle()}
         description={generateSeoDescription()}
         keywords={generateSeoKeywords()}
+        canonical={generateCanonicalUrl()}
+        structuredData={structuredData}
       />
       <LocalSchema />
       

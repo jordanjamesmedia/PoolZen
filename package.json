@@ -7,11 +7,12 @@
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "vite",
     "dev:backend": "convex dev",
-    "build": "vite build",
-    "build:vercel": "npx convex deploy --cmd 'vite build'",
+    "build": "node scripts/generate-sitemap.mjs && vite build",
+    "build:vercel": "node scripts/generate-sitemap.mjs && npx convex deploy --cmd 'vite build'",
     "preview": "vite preview",
     "check": "tsc",
-    "convex:deploy": "convex deploy"
+    "convex:deploy": "convex deploy",
+    "generate:sitemap": "node scripts/generate-sitemap.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

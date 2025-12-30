@@ -11,7 +11,15 @@ import Footer from "@/components/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { generateSeoTitle, generateSeoDescription, generateSeoKeywords, generateCanonicalUrl } from "@/lib/seo-utils";
+import { 
+  generateSeoTitle, 
+  generateSeoDescription, 
+  generateSeoKeywords, 
+  generateCanonicalUrl,
+  generateServiceSchema,
+  generateLocalBusinessSchema,
+  generateBreadcrumbSchema
+} from "@/lib/seo-utils";
 import { CheckCircle, Clock, Shield, Star } from "lucide-react";
 import Breadcrumb from "@/components/breadcrumb";
 import FAQSection from "@/components/faq-section";
@@ -80,6 +88,19 @@ export default function ServiceLocation() {
     { label: location.name }
   ];
 
+  // Generate structured data for SEO
+  const baseUrl = "https://pool-zen.vercel.app";
+  const structuredData = [
+    generateServiceSchema(service, location),
+    generateLocalBusinessSchema(location),
+    generateBreadcrumbSchema([
+      { name: "Home", url: baseUrl },
+      { name: "Services", url: `${baseUrl}/#services` },
+      { name: service.name, url: `${baseUrl}/services/${service.slug}/sydney-north-shore` },
+      { name: location.name, url: `${baseUrl}/services/${service.slug}/${location.slug}` }
+    ])
+  ];
+
   return (
     <div className="min-h-screen bg-clean-white">
       <SeoHead
@@ -87,6 +108,7 @@ export default function ServiceLocation() {
         description={generateSeoDescription(service, location)}
         keywords={generateSeoKeywords(service, location)}
         canonical={generateCanonicalUrl(service, location)}
+        structuredData={structuredData}
       />
       <LocalSchema service={service} location={location} />
       
