@@ -293,7 +293,10 @@ export function generateLocalBusinessSchema(location?: Location) {
     ],
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "Sydney, NSW",
+      "addressLocality": "Sydney",
       "addressRegion": "NSW",
+      "postalCode": "2000",
       "addressCountry": "AU"
     },
     "geo": {
